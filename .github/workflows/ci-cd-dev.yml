@@ -1,4 +1,4 @@
-name: Build and Deploy Rails App
+name: Build and Deploy Rails App with Nginx
 
 on:
   push:
@@ -10,8 +10,10 @@ jobs:
     
     env:
       AWS_REGION: us-east-1
-      ECR_REPO_NAME: ror-app
-      IMAGE_TAG: latest
+      ECR_REPO_NAME_RAILS: ror-app-rails
+      ECR_REPO_NAME_NGINX: ror-app-nginx
+      IMAGE_TAG: ${{ github.sha }}
+      TERRAFORM_DIR: infrastructure
     
     steps:
     - name: Checkout code
@@ -28,11 +30,29 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
     
-    - name: Build and push Docker image to ECR
+    - name: Build and push Rails Docker image to ECR
       run: |
-        ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}
-        docker build -t $ECR_URI:${{ env.IMAGE_TAG }} ./docker/app
-        docker push $ECR_URI:${{ env.IMAGE_TAG }}
+        ECR_URI_RAILS=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_RAILS }}
+        docker build -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} ./docker/app
+        docker push $ECR_URI_RAILS:${{ env.IMAGE_TAG }}
+        
+        # Also push as latest
+        docker tag $ECR_URI_RAILS:${{ env.IMAGE_TAG }} $ECR_URI_RAILS:latest
+        docker push $ECR_URI_RAILS:latest
+        
+        echo "RAILS_IMAGE_URI=$ECR_URI_RAILS:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
+    
+    - name: Build and push Nginx Docker image to ECR
+      run: |
+        ECR_URI_NGINX=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_NGINX }}
+        docker build -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} ./docker/nginx
+        docker push $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
+        
+        # Also push as latest
+        docker tag $ECR_URI_NGINX:${{ env.IMAGE_TAG }} $ECR_URI_NGINX:latest
+        docker push $ECR_URI_NGINX:latest
+        
+        echo "NGINX_IMAGE_URI=$ECR_URI_NGINX:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
     
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
@@ -40,17 +60,31 @@ jobs:
         terraform_version: 1.11.4
     
     - name: Terraform Format Check
-      working-directory: terraform
+      working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform fmt -check -recursive
     
     - name: Terraform Init
-      working-directory: terraform
+      working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform init
     
     - name: Terraform Validate
-      working-directory: terraform
+      working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform validate
     
+    - name: Terraform Plan
+      working-directory: ${{ env.TERRAFORM_DIR }}
+      run: terraform plan
+    
     - name: Terraform Apply
-      working-directory: terraform
+      working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform apply -auto-approve
+      env:
+        TF_VAR_ecr_rails_image: ${{ env.RAILS_IMAGE_URI }}
+        TF_VAR_ecr_nginx_image: ${{ env.NGINX_IMAGE_URI }}
+    
+    - name: Force ECS Service Update
+      run: |
+        aws ecs update-service \
+          --cluster ${{ env.ECR_REPO_NAME_RAILS }}-dev-ecs-cluster \
+          --service ${{ env.ECR_REPO_NAME_RAILS }}-dev-ecs-service \
+          --force-new-deployment
