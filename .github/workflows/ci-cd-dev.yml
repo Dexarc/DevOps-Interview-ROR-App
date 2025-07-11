@@ -33,7 +33,14 @@ jobs:
     - name: Build and push Rails Docker image to ECR
       run: |
         ECR_URI_RAILS=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_RAILS }}
-        docker build -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} ./docker/app
+        
+        # List files to debug
+        echo "Files in docker/app:"
+        ls -la ./docker/app/
+        
+        # Build with context from docker/app directory
+        cd ./docker/app
+        docker build -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} .
         docker push $ECR_URI_RAILS:${{ env.IMAGE_TAG }}
         
         # Also push as latest
@@ -45,7 +52,14 @@ jobs:
     - name: Build and push Nginx Docker image to ECR
       run: |
         ECR_URI_NGINX=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_NGINX }}
-        docker build -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} ./docker/nginx
+        
+        # List files to debug
+        echo "Files in docker/nginx:"
+        ls -la ./docker/nginx/
+        
+        # Build with context from docker/nginx directory
+        cd ./docker/nginx
+        docker build -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} .
         docker push $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
         
         # Also push as latest
