@@ -1,4 +1,4 @@
-name: Build and Deploy Rails App with Nginx
+name: Build and Deploy Rails + Nginx App
 
 on:
   push:
@@ -7,89 +7,64 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     env:
       AWS_REGION: us-east-1
       ECR_REPO_NAME_RAILS: malowtech-dev-rails
       ECR_REPO_NAME_NGINX: malowtech-dev-nginx
-      IMAGE_TAG: ${{ github.sha }}
-      TERRAFORM_DIR: infrastructure
-    
+      IMAGE_TAG: latest
+      TERRAFORM_DIR: infrastructure/dev
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
-            
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-    
-    - name: Build and push Rails Docker image to ECR
+
+    - name: Build & Push Rails Docker image
       run: |
         ECR_URI_RAILS=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_RAILS }}
-        
-        # Build with correct context - use docker/app as context and specify Dockerfile
         docker build -f ./docker/app/Dockerfile -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} .
         docker push $ECR_URI_RAILS:${{ env.IMAGE_TAG }}
-        
-        # Also push as latest
-        docker tag $ECR_URI_RAILS:${{ env.IMAGE_TAG }} $ECR_URI_RAILS:latest
-        docker push $ECR_URI_RAILS:latest
-        
         echo "RAILS_IMAGE_URI=$ECR_URI_RAILS:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
-    
-    - name: Build and push Nginx Docker image to ECR
+
+    - name: Build & Push Nginx Docker image
       run: |
         ECR_URI_NGINX=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_NGINX }}
-    
-        # Build with correct context
-        docker build -f ./docker/nginx/Dockerfile -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} .
+        docker build -f ./docker/nginx/Dockerfile -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} ./docker/nginx
         docker push $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
-    
-        # Also push as latest
-        docker tag $ECR_URI_NGINX:${{ env.IMAGE_TAG }} $ECR_URI_NGINX:latest
-        docker push $ECR_URI_NGINX:latest
-    
         echo "NGINX_IMAGE_URI=$ECR_URI_NGINX:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
-      
-    
+
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: 1.11.4
-    
+
     - name: Terraform Format Check
       working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform fmt -check -recursive
-    
+
     - name: Terraform Init
       working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform init
-    
+
     - name: Terraform Validate
       working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform validate
-    
+
     - name: Terraform Plan
       working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform plan
-    
+
     - name: Terraform Apply
       working-directory: ${{ env.TERRAFORM_DIR }}
       run: terraform apply -auto-approve
-      env:
-        TF_VAR_ecr_rails_image: ${{ env.RAILS_IMAGE_URI }}
-        TF_VAR_ecr_nginx_image: ${{ env.NGINX_IMAGE_URI }}
-    
-    - name: Force ECS Service Update
-      run: |
-        aws ecs update-service \
-          --cluster ${{ env.ECR_REPO_NAME_RAILS }}-dev-ecs-cluster \
-          --service ${{ env.ECR_REPO_NAME_RAILS }}-dev-ecs-service \
-          --force-new-deployment
