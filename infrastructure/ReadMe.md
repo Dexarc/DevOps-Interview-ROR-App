@@ -126,16 +126,6 @@ This will spin up the Rails app and Nginx locally.
 
 ---
 
-## 📤 Submission Instructions
-
-- Share your GitHub repo with the GitHub account `mallowtechdev`
-- Send an email to `hr@mallow-tech.com` with:
-  - GitHub repository link
-  - Branch name (`main`)
-  - Confirmation of successful deployment
-
----
-
 ## ✅ Notes
 
 - All AWS services are provisioned using **Terraform** only
@@ -143,13 +133,5 @@ This will spin up the Rails app and Nginx locally.
 - No credentials are hardcoded — follows IAM role best practices
 - Follows separation of modules and environment config
 
----
-
-## 🧠 Optional Enhancements
-
-- Enable Terraform state backend (S3 + DynamoDB)
-- Add ECS auto-scaling policies
-- Enable CloudWatch logging/alarms
-- Add domain name via Route 53 and SSL via ACM
 
 ---
