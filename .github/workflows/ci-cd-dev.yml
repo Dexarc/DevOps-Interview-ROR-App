@@ -39,7 +39,7 @@ jobs:
         ls -la ./docker/app/
         
         # Build with correct context - use docker/app as context and specify Dockerfile
-        docker build -f ./docker/app/Dockerfile -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} ./docker/app
+        docker build -f ./docker/app/Dockerfile -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} .
         docker push $ECR_URI_RAILS:${{ env.IMAGE_TAG }}
         
         # Also push as latest
@@ -57,7 +57,7 @@ jobs:
         ls -la ./docker/nginx/
         
         # Build with correct context - use docker/nginx as context and specify Dockerfile
-        docker build -f ./docker/nginx/Dockerfile -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} ./docker/nginx
+        docker build -f ./docker/nginx/Dockerfile -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
         docker push $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
         
         # Also push as latest
