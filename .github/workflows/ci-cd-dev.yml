@@ -34,10 +34,6 @@ jobs:
       run: |
         ECR_URI_RAILS=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_RAILS }}
         
-        # List files to debug
-        echo "Files in docker/app:"
-        ls -la ./docker/app/
-        
         # Build with correct context - use docker/app as context and specify Dockerfile
         docker build -f ./docker/app/Dockerfile -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} .
         docker push $ECR_URI_RAILS:${{ env.IMAGE_TAG }}
@@ -51,20 +47,17 @@ jobs:
     - name: Build and push Nginx Docker image to ECR
       run: |
         ECR_URI_NGINX=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME_NGINX }}
-        
-        # List files to debug
-        echo "Files in docker/nginx:"
-        ls -la ./docker/nginx/
-        
-        # Build with correct context - use docker/nginx as context and specify Dockerfile
-        docker build -f ./docker/nginx/Dockerfile -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
+    
+        # Build with correct context
+        docker build -f ./docker/nginx/Dockerfile -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} .
         docker push $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
-        
+    
         # Also push as latest
         docker tag $ECR_URI_NGINX:${{ env.IMAGE_TAG }} $ECR_URI_NGINX:latest
         docker push $ECR_URI_NGINX:latest
-        
+    
         echo "NGINX_IMAGE_URI=$ECR_URI_NGINX:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
+      
     
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
