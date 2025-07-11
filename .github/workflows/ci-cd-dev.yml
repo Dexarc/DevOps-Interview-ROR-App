@@ -10,8 +10,8 @@ jobs:
     
     env:
       AWS_REGION: us-east-1
-      ECR_REPO_NAME_RAILS: ror-app-rails
-      ECR_REPO_NAME_NGINX: ror-app-nginx
+      ECR_REPO_NAME_RAILS: malowtech-dev-rails
+      ECR_REPO_NAME_NGINX: malowtech-dev-nginx
       IMAGE_TAG: ${{ github.sha }}
       TERRAFORM_DIR: infrastructure
     
