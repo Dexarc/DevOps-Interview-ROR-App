@@ -18,16 +18,16 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([
     {
-      name      = "rails_app",
-      image     = var.ecr_ror_image,
+      name         = "rails_app",
+      image        = var.ecr_ror_image,
       portMappings = [{ containerPort = 3000 }],
-      essential = true,
+      essential    = true,
       environment = [
         { name = "RDS_ENDPOINT", value = var.rds_endpoint },
         { name = "RDS_USERNAME", value = var.rds_username },
         { name = "RDS_PASSWORD", value = var.rds_password },
-        { name = "S3_BUCKET",   value = var.s3_bucket },
-        { name = "RAILS_ENV",  value = var.environment }
+        { name = "S3_BUCKET", value = var.s3_bucket },
+        { name = "RAILS_ENV", value = var.environment }
       ],
       logConfiguration = {
         logDriver = "awslogs",
@@ -39,11 +39,11 @@ resource "aws_ecs_task_definition" "this" {
       }
     },
     {
-      name      = "nginx",
-      image     = var.ecr_nginx_image,
+      name         = "nginx",
+      image        = var.ecr_nginx_image,
       portMappings = [{ containerPort = 80 }],
-      essential = true,
-      dependsOn = [{ containerName = "rails_app", condition = "START" }],
+      essential    = true,
+      dependsOn    = [{ containerName = "rails_app", condition = "START" }],
       logConfiguration = {
         logDriver = "awslogs",
         options = {

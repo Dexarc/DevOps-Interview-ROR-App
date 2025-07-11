@@ -16,7 +16,7 @@ output "public_subnet_ids" {
 
 output "private_subnet_ids" {
   description = "List of private subnet IDs"
-  value       = module.networking.private_subnet_ids  # Fixed: Now available from networking module
+  value       = module.networking.private_subnet_ids # Fixed: Now available from networking module
 }
 
 output "ecs_subnet_ids" {

@@ -1,10 +1,10 @@
 # Application Load Balancer
 resource "aws_lb" "this" {
-  name               = "${var.project_name}-${var.environment}-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [var.alb_sg_id]  # Convert string to list
-  subnets            = var.public_subnets
+  name                       = "${var.project_name}-${var.environment}-alb"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [var.alb_sg_id] # Convert string to list
+  subnets                    = var.public_subnets
   enable_deletion_protection = false
 
   tags = merge(var.tags, {
@@ -14,10 +14,10 @@ resource "aws_lb" "this" {
 
 # Target Group
 resource "aws_lb_target_group" "this" {
-  name     = "${var.project_name}-${var.environment}-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  name        = "${var.project_name}-${var.environment}-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
   target_type = "ip"
 
   health_check {

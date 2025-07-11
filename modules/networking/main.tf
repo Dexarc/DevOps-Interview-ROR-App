@@ -28,7 +28,7 @@ resource "aws_internet_gateway" "main" {
 
 # Public Subnets (for ALB only)
 resource "aws_subnet" "public" {
-  count = var.public_subnet_count
+  count                   = var.public_subnet_count
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
   availability_zone       = local.azs[count.index]
@@ -42,7 +42,7 @@ resource "aws_subnet" "public" {
 
 # Private ECS Subnets
 resource "aws_subnet" "ecs" {
-  count = var.private_subnet_count
+  count             = var.private_subnet_count
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + 10)
   availability_zone = local.azs[count.index]
@@ -55,7 +55,7 @@ resource "aws_subnet" "ecs" {
 
 # Private RDS Subnets
 resource "aws_subnet" "rds" {
-  count = var.private_subnet_count
+  count             = var.private_subnet_count
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + 20)
   availability_zone = local.azs[count.index]
@@ -77,8 +77,8 @@ resource "aws_db_subnet_group" "rds" {
 
 # NAT Gateways + EIPs
 resource "aws_eip" "nat" {
-  count  = var.single_nat_gateway ? 1 : var.public_subnet_count
-  domain = "vpc"
+  count      = var.single_nat_gateway ? 1 : var.public_subnet_count
+  domain     = "vpc"
   depends_on = [aws_internet_gateway.main]
   tags = merge({
     Name = "${var.project_name}-${var.environment}-nat-eip-${count.index + 1}"
