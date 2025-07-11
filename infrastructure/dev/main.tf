@@ -88,6 +88,7 @@ module "ecs" {
   aws_region         = var.aws_region
   vpc_id             = module.networking.vpc_id
   security_group_ids = [module.networking.ecs_security_group_id]
+  lb_dns_name        = module.alb.dns_name
 
   ecr_ror_image   = module.ecr_rails.ecr_repository_url
   ecr_nginx_image = module.ecr_nginx.ecr_repository_url

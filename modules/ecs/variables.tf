@@ -83,3 +83,8 @@ variable "security_group_ids" {
   description = "List of security group IDs to associate with the ECS service"
   type        = list(string)
 }
+
+variable "lb_dns_name" {
+  description = "DNS name of the load balancer"
+  type        = string
+}
