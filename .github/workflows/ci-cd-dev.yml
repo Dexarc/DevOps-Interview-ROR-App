@@ -38,9 +38,8 @@ jobs:
         echo "Files in docker/app:"
         ls -la ./docker/app/
         
-        # Build with context from docker/app directory
-        cd ./docker/app
-        docker build -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} .
+        # Build with correct context - use docker/app as context and specify Dockerfile
+        docker build -f ./docker/app/Dockerfile -t $ECR_URI_RAILS:${{ env.IMAGE_TAG }} ./docker/app
         docker push $ECR_URI_RAILS:${{ env.IMAGE_TAG }}
         
         # Also push as latest
@@ -57,9 +56,8 @@ jobs:
         echo "Files in docker/nginx:"
         ls -la ./docker/nginx/
         
-        # Build with context from docker/nginx directory
-        cd ./docker/nginx
-        docker build -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} .
+        # Build with correct context - use docker/nginx as context and specify Dockerfile
+        docker build -f ./docker/nginx/Dockerfile -t $ECR_URI_NGINX:${{ env.IMAGE_TAG }} ./docker/nginx
         docker push $ECR_URI_NGINX:${{ env.IMAGE_TAG }}
         
         # Also push as latest
