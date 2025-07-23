@@ -27,6 +27,25 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
+    - name: Ensure ECR repositories exist
+      working-directory: ${{ env.TERRAFORM_DIR }}
+      run: |
+        set -e
+
+        ECR_RAILS_EXISTS=$(aws ecr describe-repositories --repository-names $ECR_REPO_NAME_RAILS --region $AWS_REGION --query 'repositories[0].repositoryName' --output text || echo "none")
+        ECR_NGINX_EXISTS=$(aws ecr describe-repositories --repository-names $ECR_REPO_NAME_NGINX --region $AWS_REGION --query 'repositories[0].repositoryName' --output text || echo "none")
+
+        if [[ "$ECR_RAILS_EXISTS" == "none" || "$ECR_NGINX_EXISTS" == "none" ]]; then
+          echo "Creating missing ECR repositories with targeted Terraform apply..."
+          terraform init
+          terraform apply -auto-approve \
+            -target=module.ecr_rails \
+            -target=module.ecr_nginx
+        else
+          echo "ECR repositories already exist. Continuing..."
+        fi
+
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
