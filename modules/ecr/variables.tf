@@ -18,3 +18,9 @@ variable "name_suffix" {
   description = "Suffix for the repository name (e.g. nginx, rails)"
   type        = string
 }
+
+variable "force_delete" {
+  description = "Whether to force delete the repository"
+  type        = bool
+  default     = false
+}

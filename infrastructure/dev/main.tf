@@ -40,6 +40,7 @@ module "ecr_rails" {
   source       = "../../modules/ecr"
   name_suffix  = "rails"
   project_name = var.project_name
+  force_delete = true
   environment  = var.environment
   tags         = var.tags
 }
@@ -48,6 +49,7 @@ module "ecr_nginx" {
   source       = "../../modules/ecr"
   name_suffix  = "nginx"
   project_name = var.project_name
+  force_delete = true
   environment  = var.environment
   tags         = var.tags
 }
@@ -104,4 +106,5 @@ module "ecs" {
   ecs_execution_role_arn = module.iam.ecs_execution_role_arn
   ecs_task_role_arn      = module.iam.ecs_task_role_arn
   target_group_arn       = module.alb.target_group_arn
+  depends_on             = [module.rds] # Ensure ECS doesn't delete before RDS is cleaned up
 }

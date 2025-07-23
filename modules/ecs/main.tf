@@ -41,13 +41,21 @@ resource "aws_ecs_task_definition" "this" {
           awslogs-stream-prefix = "rails"
         }
       }
+      healthCheck = {
+      command     = ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      interval    = 10
+      timeout     = 5
+      retries     = 3
+      startPeriod = 20
+    }
     },
+    
     {
       name         = "nginx",
       image        = var.ecr_nginx_image,
       portMappings = [{ containerPort = 80 }],
       essential    = true,
-      dependsOn    = [{ containerName = "rails_app", condition = "START" }],
+      dependsOn = [{ containerName = "rails_app", condition = "HEALTHY" }],
       logConfiguration = {
         logDriver = "awslogs",
         options = {
