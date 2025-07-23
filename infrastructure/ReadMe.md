@@ -123,6 +123,10 @@ This will spin up the Rails app and Nginx locally.
    - Run Terraform to deploy the infrastructure
    - Trigger an ECS deployment with the new image tags
 5. Visit the Load Balancer DNS to view the app live
+   http://malowtech-development-alb-2053346310.us-east-1.elb.amazonaws.com
+   Use this URL to access the deployed application in the development environment.
+
+
 
 ---
 
