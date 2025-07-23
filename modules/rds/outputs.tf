@@ -1,7 +1,7 @@
 # RDS Instance Outputs
 output "rds_endpoint" {
-  description = "The RDS instance endpoint"
-  value       = aws_db_instance.main.endpoint
+  description = "RDS instance endpoint without port"
+  value       = split(":", aws_db_instance.main.endpoint)[0]
 }
 
 output "rds_port" {
