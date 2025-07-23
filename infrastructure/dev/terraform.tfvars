@@ -1,6 +1,6 @@
 # --- General Variables ---
 project_name = "malowtech"
-environment  = "dev"
+environment  = "development"
 aws_region   = "us-east-1"
 tags = {
   Project     = "malowtech"
