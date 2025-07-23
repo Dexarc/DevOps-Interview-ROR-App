@@ -11,8 +11,8 @@ jobs:
 
     env:
       AWS_REGION: us-east-1
-      ECR_REPO_NAME_RAILS: malowtech-dev-rails
-      ECR_REPO_NAME_NGINX: malowtech-dev-nginx
+      ECR_REPO_NAME_RAILS: malowtech-development-rails
+      ECR_REPO_NAME_NGINX: malowtech-development-nginx
       IMAGE_TAG: latest
       TERRAFORM_DIR: infrastructure/dev
 
