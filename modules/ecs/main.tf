@@ -56,6 +56,12 @@ resource "aws_ecs_task_definition" "this" {
       portMappings = [{ containerPort = 80 }],
       essential    = true,
       dependsOn = [{ containerName = "rails_app", condition = "HEALTHY" }],
+
+      # to fix the hostname issue within same task
+      entryPoint = ["sh"],
+      command = ["-c", "sed -i 's/rails_app/localhost/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"],
+      
+
       logConfiguration = {
         logDriver = "awslogs",
         options = {
